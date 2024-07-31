@@ -6,6 +6,8 @@ use Astrotomic\Translatable\Translatable;
 use Modules\Core\Icrud\Entities\CrudModel;
 use Modules\Ifillable\Traits\isFillable;
 use Modules\Ilocations\Entities\Country;
+use Modules\Iwebhooks\Entities\Type;
+use Modules\Iwebhooks\Entities\EventType;
 
 class Hook extends CrudModel
 {
@@ -15,9 +17,9 @@ class Hook extends CrudModel
   public $transformer = 'Modules\Iwebhooks\Transformers\HookTransformer';
   public $repository = 'Modules\Iwebhooks\Repositories\HookRepository';
   public $requestValidation = [
-      'create' => 'Modules\Iwebhooks\Http\Requests\CreateHookRequest',
-      'update' => 'Modules\Iwebhooks\Http\Requests\UpdateHookRequest',
-    ];
+    'create' => 'Modules\Iwebhooks\Http\Requests\CreateHookRequest',
+    'update' => 'Modules\Iwebhooks\Http\Requests\UpdateHookRequest',
+  ];
   //Instance external/internal events to dispatch with extraData
   public $dispatchesEventsWithBindings = [
     //eg. ['path' => 'path/module/event', 'extraData' => [/*...optional*/]]
@@ -43,7 +45,11 @@ class Hook extends CrudModel
     'call_every_minutes',
     'category_id',
     'country_id',
-    'redirect_link'
+    'redirect_link',
+    'status',
+    'type_id',
+    'event_entity',
+    'event_type_id'
   ];
 
   protected $casts = [
@@ -56,11 +62,13 @@ class Hook extends CrudModel
     return $this->belongsTo(Category::class)->with('translations');
   }
 
-  public function logs() {
+  public function logs()
+  {
     return $this->hasMany(Log::class);
   }
 
-  public function lastLog() {
+  public function lastLog()
+  {
     return $this->hasOne(Log::class)->latestOfMany();
   }
 
@@ -69,7 +77,8 @@ class Hook extends CrudModel
     return $this->belongsTo(Country::class)->with('translations');
   }
 
-  public function getStatusInfoAttribute() {
+  public function getStatusInfoAttribute()
+  {
     $defaultInfo = [
       'label' => trans('iwebhooks::cms.label.noRegistration'),
       'color' => '#6c757d',
@@ -77,8 +86,8 @@ class Hook extends CrudModel
       'textColor' => "#ffff"
     ];
     if ($this->relationLoaded('lastLog')) {
-      if(isset($this->lastLog)) {
-        if($this->lastLog->http_status == 200) {
+      if (isset($this->lastLog)) {
+        if ($this->lastLog->http_status == 200) {
           $defaultInfo = [
             'label' => trans('iwebhooks::cms.label.online'),
             'color' => '#28a745',
@@ -88,10 +97,11 @@ class Hook extends CrudModel
         } else $defaultInfo['label'] = trans('iwebhooks::cms.label.offline');
       }
     }
-    return (object) $defaultInfo;
+    return (object)$defaultInfo;
   }
 
-  public function getHookInfoAttribute() {
+  public function getHookInfoAttribute()
+  {
     $default = [
       'hook' => $this->endpoint,
       'port' => null,
@@ -108,6 +118,18 @@ class Hook extends CrudModel
       ];
     }
 
-    return (object) $default;
+    return (object)$default;
+  }
+
+  public function getTypeAttribute()
+  {
+    $typeModel = new Type();
+    return $typeModel->show($this->type_id);
+  }
+
+  public function getEventTypeAttribute()
+  {
+    $eventType = new EventType();
+    return $eventType->show($this->event_type_id);
   }
 }
