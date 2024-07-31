@@ -57,6 +57,12 @@ $router->group(['prefix' => '/iwebhooks/v1'], function (Router $router) {
     'staticEntity' => 'Modules\Iwebhooks\Entities\Type',
     //'middleware' => ['create' => [], 'index' => [], 'show' => [], 'update' => [], 'delete' => [], 'restore' => []]
   ]);
+  $router->apiCrud([
+    'module' => 'iwebhooks',
+    'prefix' => 'event-types',
+    'staticEntity' => 'Modules\Iwebhooks\Entities\EventType',
+    //'middleware' => ['create' => [], 'index' => [], 'show' => [], 'update' => [], 'delete' => [], 'restore' => []]
+  ]);
 // append
 
 
