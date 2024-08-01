@@ -3,12 +3,13 @@
 namespace Modules\Iwebhooks\Services;
 
 use Mockery\CountValidator\Exception;
+use Modules\Iwebhooks\Entities\Hook;
 use Modules\Iwebhooks\Entities\Log;
 use Illuminate\Support\Facades\Process;
 
 class DispatchService
 {
-  public function dispatchWebhook($criteria, $params)
+  public function dispatchWebhook($criteria, $params, $extraBody = null)
   {
     $response = null;
     $model = null;
@@ -28,6 +29,9 @@ class DispatchService
       //Start sync
       $model->update(['is_loading' => 1]);
       $createLog = ['hook_id' => $model->id];
+
+      //Add extra body [IMPORTANT] after this line don't save/update directly this model
+      if ($extraBody) $model->setAttribute('body', array_merge($extraBody, $model->body));
 
       $publicURL = setting("iwebhooks::urlPublicWebhook", null, false);
 
@@ -61,12 +65,11 @@ class DispatchService
       Log::create($createLog);
 
       //Finish sync
-      $model->update(['is_loading' => 0]);
-      \Log::info("DispatchService::Hook With ID: {$model->id} run Successfully");
+      Hook::where('id',$model->id)->update(['is_loading' => 0]);
+      \Log::info("Iwebhooks:: Hook ID: {$model->id} run Successfully");
     } catch (\Exception $e) {
-      \Log::info("DispatchService::Error: (Hook-{$model->id}) {$e->getMessage()}");
       $code = $e->getCode();
-      if ($code != 204 && $model) $model->update(['is_loading' => 0]);
+      if ($code != 204 && $model) Hook::where('id',$model->id)->update(['is_loading' => 0]);
       $response = ["errors" => $e->getMessage()];
     }
 
@@ -94,7 +97,7 @@ class DispatchService
         $responseHook = $client->request($data->http_method,
           $data->endpoint,
           [
-            "body" => json_encode($data->body),
+            "json" => $data->body,
             'headers' => $data->headers
           ]
         );
