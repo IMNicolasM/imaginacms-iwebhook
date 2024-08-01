@@ -19,7 +19,7 @@ class EventType extends CrudStaticModel
       ],
       self::UPDATED => [
         'title' => trans('iwebhooks::statics.eventType.updated'),
-        'value' => 'eloquent.updated:'
+        'value' => 'eloquent.saved:'//Use this to catch also trnaslations changes
       ],
       self::DELETED => [
         'title' => trans('iwebhooks::statics.eventType.deleted'),
