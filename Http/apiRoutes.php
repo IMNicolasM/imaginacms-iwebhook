@@ -28,6 +28,12 @@ Route::prefix('/iwebhooks/v1')->group(function (Router $router) {
           'path' => '/dispatch/{criteria}', // Route Path
           'uses' => 'dispatch', //Name of the controller method to use
           //'middleware' => [] // if not set up middleware, auth:api will be the default
+        ],
+        [
+          'method' => 'post',
+          'path' => '/tunnel',
+          'uses' => 'tunnel',
+          'middleware' => []
         ]
       ]
     ]);
@@ -45,6 +51,18 @@ Route::prefix('/iwebhooks/v1')->group(function (Router $router) {
       //  ]
       // ]
     ]);
+  $router->apiCrud([
+    'module' => 'iwebhooks',
+    'prefix' => 'types',
+    'staticEntity' => 'Modules\Iwebhooks\Entities\Type',
+    //'middleware' => ['create' => [], 'index' => [], 'show' => [], 'update' => [], 'delete' => [], 'restore' => []]
+  ]);
+  $router->apiCrud([
+    'module' => 'iwebhooks',
+    'prefix' => 'event-types',
+    'staticEntity' => 'Modules\Iwebhooks\Entities\EventType',
+    //'middleware' => ['create' => [], 'index' => [], 'show' => [], 'update' => [], 'delete' => [], 'restore' => []]
+  ]);
 // append
 
 

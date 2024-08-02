@@ -6,6 +6,8 @@ use Astrotomic\Translatable\Translatable;
 use Modules\Core\Icrud\Entities\CrudModel;
 use Modules\Ifillable\Traits\isFillable;
 use Modules\Ilocations\Entities\Country;
+use Modules\Iwebhooks\Entities\Type;
+use Modules\Iwebhooks\Entities\EventType;
 
 class Hook extends CrudModel
 {
@@ -43,7 +45,11 @@ class Hook extends CrudModel
     'call_every_minutes',
     'category_id',
     'country_id',
-    'redirect_link'
+    'redirect_link',
+    'status',
+    'type_id',
+    'event_entity',
+    'event_type_id'
   ];
 
   protected $casts = [
@@ -109,5 +115,17 @@ class Hook extends CrudModel
     }
 
     return (object) $default;
+  }
+
+  public function getTypeAttribute()
+  {
+    $typeModel = new Type();
+    return $typeModel->show($this->type_id);
+  }
+
+  public function getEventTypeAttribute()
+  {
+    $eventType = new EventType();
+    return $eventType->show($this->event_type_id);
   }
 }
