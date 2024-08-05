@@ -15,7 +15,7 @@ class EventServiceProvider extends ServiceProvider
     $hookRepository = app('Modules\Iwebhooks\Repositories\HookRepository');
 
     //Get the event hooks to listen for events
-    $requestParams = array("filter" => ['type_id' => 1]);
+    $requestParams = array("filter" => ['type_id' => 1, 'status' => 1]);
     $hooks = $hookRepository->getItemsBy(json_decode(json_encode($requestParams)));
 
     //Register the listeners to hook events
@@ -38,7 +38,10 @@ class EventServiceProvider extends ServiceProvider
               $hookService = new DispatchService();
               $hookService->dispatchWebhook(
                 $hook->id, [],
-                ['modelData' => CrudResource::transformData($modelData)->resolve()]
+                [
+                  'modelClass' => get_class($modelData),
+                  'modelData' => CrudResource::transformData($modelData)->resolve(),
+                ]
               );
               \Log::info("Iwedhooks:: Hook [" . $hook->title . "] called in event [" . $eventName . "]");
             }
